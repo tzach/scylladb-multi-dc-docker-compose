@@ -1,0 +1,121 @@
+version: "3"
+
+services:
+
+  scylla-node1:
+    container_name: scylla-node1
+    image: scylladb/scylla:5.4
+    command: --seeds=scylla-node1 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./scylla.yaml:/etc/scylla/scylla.yaml:Z"
+      - "./cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties:Z"
+    networks:
+      web:
+    healthcheck:
+      test: cqlsh -e "SHOW VERSION" || exit 1
+      interval: 15s
+      retries: 4
+      start_period: 60s
+      timeout: 30s
+
+  scylla-node2:
+    container_name: scylla-node2
+    image: scylladb/scylla:5.4
+    command: --seeds=scylla-node1 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./scylla.yaml:/etc/scylla/scylla.yaml:Z"
+      - "./cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties:Z"
+    networks:
+      web:
+    healthcheck:
+      test: cqlsh -e "SHOW VERSION" || exit 1
+      interval: 15s
+      retries: 4
+      start_period: 60s
+      timeout: 30s
+    depends_on:
+      scylla-node1:
+        condition: service_healthy
+
+
+  scylla-node3:
+    container_name: scylla-node3
+    image: scylladb/scylla:5.4
+    command: --seeds=scylla-node1 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./scylla.yaml:/etc/scylla/scylla.yaml:Z"
+      - "./cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties:Z"
+    networks:
+      web:
+    healthcheck:
+      test: cqlsh -e "SHOW VERSION" || exit 1
+      interval: 15s
+      retries: 4
+      start_period: 60s
+      timeout: 30s
+    depends_on:
+      scylla-node2:
+        condition: service_healthy
+        
+  scylla-node4:
+    container_name: scylla-node4
+    image: scylladb/scylla:5.4
+    command: --seeds=scylla-node1 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./scylla.yaml:/etc/scylla/scylla.yaml:Z"
+      - "./cassandra-rackdc.properties.dc2:/etc/scylla/cassandra-rackdc.properties:Z"
+    networks:
+      web:
+    healthcheck:
+      test: cqlsh -e "SHOW VERSION" || exit 1
+      interval: 15s
+      retries: 4
+      start_period: 60s
+      timeout: 30s
+    depends_on:
+      scylla-node3:
+        condition: service_healthy
+
+  scylla-node5:
+    container_name: scylla-node5
+    image: scylladb/scylla:5.4
+    command: --seeds=scylla-node1 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./scylla.yaml:/etc/scylla/scylla.yaml:Z"
+      - "./cassandra-rackdc.properties.dc2:/etc/scylla/cassandra-rackdc.properties:Z"
+    networks:
+      web:
+    healthcheck:
+      test: cqlsh -e "SHOW VERSION" || exit 1
+      interval: 15s
+      retries: 4
+      start_period: 30s
+      timeout: 30s
+    depends_on:
+      scylla-node4:
+        condition: service_healthy
+
+  scylla-node6:
+    container_name: scylla-node6
+    image: scylladb/scylla:5.4
+    command: --seeds=scylla-node1 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./scylla.yaml:/etc/scylla/scylla.yaml:Z"
+      - "./cassandra-rackdc.properties.dc2:/etc/scylla/cassandra-rackdc.properties:Z"
+    networks:
+      web:
+    healthcheck:
+      test: cqlsh -e "SHOW VERSION" || exit 1
+      interval: 15s
+      retries: 4
+      start_period: 30s
+      timeout: 30s
+    depends_on:
+      scylla-node5:
+        condition: service_healthy
+
+
+        
+networks:
+  web:
+    driver: bridge
